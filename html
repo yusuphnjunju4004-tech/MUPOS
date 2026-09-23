@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <title>MU POS Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+    h1 { color: #333; }
+    section { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #eee; }
+    button { padding: 8px 12px; margin-top: 10px; cursor: pointer; }
+    form { margin-top: 10px; }
+    input, select { padding: 6px; margin: 4px; }
+  </style>
+</head>
+<body>
+  <h1>📊 MU POS Dashboard</h1>
+
+  <!-- Bidhaa -->
+  <section>
+    <h2>📦 Bidhaa Ghalani</h2>
+    <button onclick="loadProducts()">Onyesha Bidhaa</button>
+    <form onsubmit="addProduct(event)">
+      <input type="text" id="pname" placeholder="Jina" required>
+      <input type="text" id="pimei" placeholder="IMEI">
+      <input type="text" id="pcategory" placeholder="Kategoria">
+      <input type="number" id="pbuy" placeholder="Bei Kununua">
+      <input type="number" id="psell" placeholder="Bei Kuuza">
+      <input type="number" id="pstock" placeholder="Stock">
+      <button type="submit">Ongeza Bidhaa</button>
+    </form>
+    <table id="productsTable">
+      <thead>
+        <tr>
+          <th>ID</th><th>Jina</th><th>IMEI</th><th>Kategoria</th>
+          <th>Bei Kununua</th><th>Bei Kuuza</th><th>Stock</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Mauzo -->
+  <section>
+    <h2>💰 Mauzo</h2>
+    <button onclick="loadSales()">Onyesha Mauzo</button>
+    <form onsubmit="addSale(event)">
+      <input type="text" id="sproduct" placeholder="Bidhaa ID" required>
+      <input type="text" id="simei" placeholder="IMEI">
+      <input type="text" id="scustomer" placeholder="Mteja">
+      <input type="number" id="squantity" placeholder="Kiasi">
+      <button type="submit">Rekodi Mauzo</button>
+    </form>
+    <table id="salesTable">
+      <thead>
+        <tr>
+          <th>ID</th><th>Bidhaa</th><th>IMEI</th><th>Mteja</th>
+          <th>Kiasi</th><th>Jumla</th><th>Faida</th><th>Tarehe</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Matumizi -->
+  <section>
+    <h2>🧾 Matumizi</h2>
+    <button onclick="loadExpenses()">Onyesha Matumizi</button>
+    <form onsubmit="addExpense(event)">
+      <input type="text" id="edesc" placeholder="Maelezo" required>
+      <input type="number" id="eamount" placeholder="Kiasi">
+      <button type="submit">Ongeza Matumizi</button>
+    </form>
+    <table id="expensesTable">
+      <thead>
+        <tr><th>ID</th><th>Maelezo</th><th>Kiasi</th><th>Tarehe</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Madeni -->
+  <section>
+    <h2>⚖️ Madeni</h2>
+    <button onclick="loadDebts()">Onyesha Madeni</button>
+    <form onsubmit="addDebt(event)">
+      <input type="text" id="dsupplier" placeholder="Supplier">
+      <input type="text" id="dcustomer" placeholder="Mteja">
+      <input type="text" id="dphone" placeholder="Simu">
+      <select id="dtype">
+        <option value="kudai">Kudai</option>
+        <option value="kudaiwa">Kudaiwa</option>
+      </select>
+      <input type="number" id="damount" placeholder="Kiasi">
+      <button type="submit">Ongeza Deni</button>
+    </form>
+    <table id="debtsTable">
+      <thead>
+        <tr>
+          <th>ID</th><th>Supplier</th><th>Mteja</th><th>Simu</th>
+          <th>Aina</th><th>Kiasi</th><th>Status</th><th>Tarehe</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Stats -->
+  <section>
+    <h2>📈 Takwimu</h2>
+    <button onclick="loadStats()">Onyesha Stats</button>
+    <div id="stats"></div>
+  </section>
+
+  <script>
+    const API = "http://localhost:5000/api";
+
+    function loadProducts() {
+      fetch(`${API}/products`).then(res=>res.json()).then(data=>{
+        const tbody=document.querySelector("#productsTable tbody");
+        tbody.innerHTML="";
+        data.forEach(p=>{
+          tbody.innerHTML+=`<tr>
+            <td>${p.id}</td><td>${p.name}</td><td>${p.imei_number}</td>
+            <td>${p.category}</td><td>${p.buying_price}</td>
+            <td>${p.selling_price}</td><td>${p.stock_quantity}</td>
+          </tr>`;
+        });
+      });
+    }
+    function addProduct(e){
+      e.preventDefault();
+      const body={
+        name: pname.value, imei_number:pimei.value, category:pcategory.value,
+        buying_price:pbuy.value, selling_price:psell.value, stock_quantity:pstock.value
+      };
+      fetch(`${API}/products`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+        .then(()=>loadProducts());
+    }
+
+    function loadSales(){
+      fetch(`${API}/sales-history`).then(res=>res.json()).then(data=>{
+        const tbody=document.querySelector("#salesTable tbody");
+        tbody.innerHTML="";
+        data.forEach(s=>{
+          tbody.innerHTML+=`<tr>
+            <td>${s.id}</td><td>${s.name}</td><td>${s.imei_sold}</td>
+            <td>${s.customer_name||"-"}</td><td>${s.quantity}</td>
+            <td>${s.total_price}</td><td>${s.profit}</td><td>${s.sale_date}</td>
+          </tr>`;
+        });
+      });
+    }
+    function addSale(e){
+      e.preventDefault();
+      const body={
+        product_id:sproduct.value, imei_sold:simei.value,
+        customer_name:scustomer.value, quantity:squantity.value
+      };
+      fetch(`${API}/sales`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+        .then(()=>loadSales());
+    }
+
+    function loadExpenses(){
+      fetch(`${API}/expenses`).then(res=>res.json()).then(data=>{
+        const tbody=document.querySelector("#expensesTable tbody");
+        tbody.innerHTML="";
+        data.forEach(e=>{
+          tbody.innerHTML+=`<tr>
+            <td>${e.id}</td><td>${e.description}</td><td>${e.amount}</td><td>${e.created_at}</td>
+          </tr>`;
+        });
+      });
+    }
+    function addExpense(ev){
+      ev.preventDefault();
+      const body={description:edesc.value, amount:eamount.value};
+      fetch(`${API}/expenses`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+        .then(()=>loadExpenses());
+    }
+
+    function loadDebts(){
+      fetch(`${API}/debts`).then(res=>res.json()).then(data=>{
+        const tbody=document.querySelector("#debtsTable tbody");
+        tbody.innerHTML="";
+        data.forEach(d=>{
+          tbody.innerHTML+=`<tr>
+            <td>${d.id}</td><td>${d.supplier_name||"-"}</td><td>${d.customer_name||"-"}</td>
+            <td>${d.customer_phone||"-"}</td><td>${d.type}</td>
+            <td>${d.amount}</td><td>${d.status}</td><td>${d.created_at}</td>
+          </tr>`;
+        });
+      });
+    }
+    function addDebt(e){
+      e.preventDefault();
+      const body={
+        supplier_name:dsupplier.value,
